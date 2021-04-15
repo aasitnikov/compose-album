@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -19,7 +20,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicappcompose.Album
@@ -30,6 +33,7 @@ import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
 fun AlbumBackdrop(
     album: Album,
     backgroundColor: Color,
+    scrollPx: Int,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -41,12 +45,13 @@ fun AlbumBackdrop(
             Spacer(Modifier.height(36.dp))
             Box(
                 Modifier
+                    .offset { IntOffset(0, scrollPx) }
                     .size(192.dp)
                     .background(Color.Black)
             )
 
             Spacer(Modifier.height(16.dp))
-            Text(album.title, fontSize = 24.sp)
+            Text(album.title, fontSize = 24.sp, fontWeight = FontWeight.Medium)
 
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -72,6 +77,7 @@ private fun AlbumBackdropPreview() {
         AlbumBackdrop(
             album = Overgrown,
             backgroundColor = Color(0xff2A5F79),
+            scrollPx = 0,
             modifier = Modifier.width(360.dp),
         )
     }
