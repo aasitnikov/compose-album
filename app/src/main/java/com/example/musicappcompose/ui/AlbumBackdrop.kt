@@ -20,6 +20,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -34,6 +35,7 @@ fun AlbumBackdrop(
     album: Album,
     backgroundColor: Color,
     scrollPx: Int,
+    scrollFraction: Float,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -50,11 +52,15 @@ fun AlbumBackdrop(
                     .background(Color.Black)
             )
 
+            // outputs 1..0 when scrollOffset in between 0.2..0.5
+            val titleAlpha = 1 - ((scrollFraction - 0.2f) * 10 / 3).coerceIn(0f, 1f)
+            val alphaModifier = Modifier.graphicsLayer(alpha = titleAlpha)
+
             Spacer(Modifier.height(16.dp))
-            Text(album.title, fontSize = 24.sp, fontWeight = FontWeight.Medium)
+            Text(album.title, fontSize = 24.sp, fontWeight = FontWeight.Medium, modifier = alphaModifier)
 
             Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = alphaModifier) {
                 Box(
                     Modifier
                         .size(24.dp)
@@ -78,6 +84,7 @@ private fun AlbumBackdropPreview() {
             album = Overgrown,
             backgroundColor = Color(0xff2A5F79),
             scrollPx = 0,
+            scrollFraction = 0f,
             modifier = Modifier.width(360.dp),
         )
     }

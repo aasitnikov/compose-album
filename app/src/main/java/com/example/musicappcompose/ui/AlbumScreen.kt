@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.onSizeChanged
@@ -43,17 +44,22 @@ fun AlbumScreen(album: Album) {
         LazyColumn(Modifier.fillMaxSize(), state) {
             item {
                 Box {
-                    val scrollOffset = if (state.firstVisibleItemIndex == 0) {
-                        state.firstVisibleItemScrollOffset
-                    } else {
-                        0
+                    val scrollFraction = state.firstItemOffsetFraction()
+                    val scrimColor = MaterialTheme.colors.background.copy(alpha = scrollFraction)
+                    Box(
+                        Modifier.drawWithContent {
+                            drawContent()
+                            drawRect(scrimColor)
+                        }
+                    ) {
+                        AlbumBackdrop(
+                            album,
+                            Color(0xff2A5F79),
+                            state.firstItemOffsetPx(),
+                            scrollFraction,
+                            Modifier.fillMaxWidth(),
+                        )
                     }
-                    AlbumBackdrop(
-                        album,
-                        Color(0xff2A5F79),
-                        scrollOffset,
-                        Modifier.fillMaxWidth(),
-                    )
                     BottomSheetHat(
                         Modifier
                             .fillMaxWidth()
@@ -83,6 +89,25 @@ fun AlbumScreen(album: Album) {
         AnchoredBox(state, Modifier.fillMaxWidth()) {
             ThreeButtons()
         }
+    }
+}
+
+@Composable
+private fun LazyListState.firstItemOffsetPx(): Int {
+    return if (firstVisibleItemIndex == 0) {
+        firstVisibleItemScrollOffset
+    } else {
+        0
+    }
+}
+
+@Composable
+private fun LazyListState.firstItemOffsetFraction(): Float {
+    return if (firstVisibleItemIndex == 0) {
+        val firstItemInfo = layoutInfo.visibleItemsInfo.firstOrNull() ?: return 0f
+        return -firstItemInfo.offset.toFloat() / firstItemInfo.size
+    } else {
+        0f
     }
 }
 
