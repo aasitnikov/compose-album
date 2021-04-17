@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -38,24 +39,58 @@ import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
 @Composable
 fun RoundButton(
     onClick: () -> Unit,
-    color: Color,
+    backgroundColor: Color,
     modifier: Modifier = Modifier,
+    rippleColor: Color = Color.Unspecified,
     content: @Composable () -> Unit
 ) {
     Box(
         modifier = modifier
             .size(64.dp)
-            .background(color = color, shape = CircleShape)
+            .background(color = backgroundColor, shape = CircleShape)
             .clip(CircleShape)
             .clickable(
                 onClick = onClick,
                 role = Role.Button,
                 interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(color = Color.Black.copy(alpha = 0.1f))
+                indication = rememberRipple(color = rippleColor)
             ),
         contentAlignment = Alignment.Center,
         content = { content() },
     )
+}
+
+@Composable
+fun RoundButtonWithText(
+    onClick: () -> Unit,
+    backgroundColor: Color,
+    icon: Painter,
+    iconTint: Color,
+    text: String,
+    modifier: Modifier = Modifier,
+    rippleColor: Color = Color.Unspecified,
+) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        RoundButton(
+            onClick = onClick,
+            backgroundColor = backgroundColor,
+            rippleColor = rippleColor,
+        ) {
+            Icon(icon, tint = iconTint, contentDescription = null)
+        }
+        Spacer(Modifier.height(8.dp))
+        CompositionLocalProvider(
+            LocalContentAlpha provides ContentAlpha.medium,
+            LocalContentColor provides Color.White,
+        ) {
+            Text(
+                text = text,
+                textAlign = TextAlign.Center,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal
+            )
+        }
+    }
 }
 
 @Preview
@@ -67,23 +102,13 @@ private fun SolidPreview() {
                 .background(Color(0xFF2A5F79))
                 .padding(32.dp)
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                RoundButton(onClick = { }, color = Color(0xFFFFDD60)) {
-                    Icon(painter = rememberVectorPainter(Icons.Filled.PlayArrow), contentDescription = null)
-                }
-                Spacer(Modifier.height(8.dp))
-                CompositionLocalProvider(
-                    LocalContentAlpha provides ContentAlpha.medium,
-                    LocalContentColor provides Color.White,
-                ) {
-                    Text(
-                        text = "Слушать",
-                        textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                }
-            }
+            RoundButtonWithText(
+                onClick = { },
+                backgroundColor = Color(0xFFFFDD60),
+                icon = rememberVectorPainter(Icons.Filled.PlayArrow),
+                iconTint = Color.Black,
+                text = "Слушать",
+            )
         }
     }
 }
@@ -97,27 +122,13 @@ private fun TransparentPreview() {
                 .background(Color(0xFF2A5F79))
                 .padding(32.dp)
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                RoundButton(onClick = { }, color = Color.White.copy(alpha = 0.1f)) {
-                    Icon(
-                        painter = rememberVectorPainter(Icons.Outlined.Share),
-                        tint = Color.White,
-                        contentDescription = null,
-                    )
-                }
-                Spacer(Modifier.height(8.dp))
-                CompositionLocalProvider(
-                    LocalContentAlpha provides ContentAlpha.medium,
-                    LocalContentColor provides Color.White,
-                ) {
-                    Text(
-                        text = "Поделиться",
-                        textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                }
-            }
+            RoundButtonWithText(
+                onClick = { },
+                backgroundColor = Color.White.copy(alpha = 0.1f),
+                icon = rememberVectorPainter(Icons.Outlined.Share),
+                iconTint = Color.White,
+                text = "Поделиться",
+            )
         }
     }
 }
