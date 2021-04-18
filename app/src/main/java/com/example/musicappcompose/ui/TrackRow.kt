@@ -2,6 +2,7 @@ package com.example.musicappcompose.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,7 +42,8 @@ fun TrackRow(
     Row(
         modifier
             .height(52.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable(onClick = { /*TODO*/ }),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(Modifier.width(20.dp), contentAlignment = Alignment.Center) {

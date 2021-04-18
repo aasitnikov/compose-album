@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -103,7 +104,7 @@ fun AlbumScreen(album: Album) {
         AnchoredBox(lazyListState, Modifier.fillMaxWidth()) {
             val fraction = lazyListState.firstItemOffsetFraction()
             val itemsAlpha = map(fraction, from = 0.5f..0.8f, to = 1f..0f).coerceIn(0f, 1f)
-            ThreeButtons(itemsAlpha)
+            ThreeButtons(itemsAlpha, Modifier.align(Alignment.TopCenter))
         }
     }
 }
@@ -168,11 +169,11 @@ private fun LazyListState.firstItemOffsetFraction(): Float {
 }
 
 @Composable
-private fun ThreeButtons(itemsAlpha: Float) {
-    Row {
+private fun ThreeButtons(itemsAlpha: Float, modifier: Modifier = Modifier) {
+    Row(modifier = modifier) {
         RoundButtonWithText(
             modifier = Modifier
-                .weight(0.5f)
+                .width(144.dp)
                 .alpha(itemsAlpha),
             onClick = { /*TODO*/ },
             backgroundColor = Color.White.copy(alpha = 0.1f),
@@ -192,7 +193,7 @@ private fun ThreeButtons(itemsAlpha: Float) {
         )
         RoundButtonWithText(
             modifier = Modifier
-                .weight(0.5f)
+                .width(144.dp)
                 .alpha(itemsAlpha),
             onClick = { /*TODO*/ },
             backgroundColor = Color.White.copy(alpha = 0.1f),

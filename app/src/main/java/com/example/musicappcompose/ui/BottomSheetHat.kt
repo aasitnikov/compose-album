@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -29,8 +30,9 @@ fun BottomSheetHat(modifier: Modifier = Modifier) {
     ) {
         Box(
             Modifier
+                .padding(top = 8.dp)
                 .size(60.dp, 4.dp)
-                .align(Alignment.Center)
+                .align(Alignment.TopCenter)
                 .background(
                     color = MaterialTheme.colors.onBackground.copy(alpha = 0.1f),
                     shape = CircleShape
