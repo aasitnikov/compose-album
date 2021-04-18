@@ -5,26 +5,39 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.bumptech.glide.Glide
 import com.example.musicappcompose.ui.AlbumScreen
 import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
+import com.google.accompanist.glide.LocalRequestManager
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val glide = Glide.with(applicationContext)
         setContent {
+            LaunchedEffect(Unit) {
+                glide.pauseAllRequests()
+                delay(3000)
+                glide.resumeRequests()
+            }
             MusicAppComposeTheme {
-                var isLoading by rememberSaveable { mutableStateOf(true) }
-                Surface(color = MaterialTheme.colors.background) {
-                    AlbumScreen(
-                        Overgrown.takeUnless { isLoading },
-                        onBackClicked = { isLoading = true },
-                        onMoreClicked = { isLoading = false },
-                    )
+                CompositionLocalProvider(LocalRequestManager provides glide) {
+                    var isLoading by rememberSaveable { mutableStateOf(true) }
+                    Surface(color = MaterialTheme.colors.background) {
+                        AlbumScreen(
+                            Overgrown.takeUnless { isLoading },
+                            onBackClicked = { isLoading = !isLoading },
+                            onMoreClicked = { isLoading = !isLoading },
+                        )
+                    }
                 }
             }
         }
@@ -35,6 +48,8 @@ val Overgrown = Album(
     "Overgrown",
     "James Blake",
     "2013",
+    albumArtUrl = "https://media.pitchfork.com/photos/59299ffcb1335d7bf1697f08/1:1/w_600/b7213934.jpg",
+    artistArtUrl = "https://s.err.ee/photo/crop/2020/02/11/742810he0f6t4.jpg",
     listOf(
         Track("Overgrown", 1, false),
         Track("I Am Sold", 2, false),

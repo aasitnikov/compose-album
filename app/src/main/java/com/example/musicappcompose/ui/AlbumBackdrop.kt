@@ -11,14 +11,17 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +33,7 @@ import com.example.musicappcompose.Album
 import com.example.musicappcompose.Overgrown
 import com.example.musicappcompose.map
 import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
+import com.google.accompanist.glide.GlideImage
 
 @Composable
 fun AlbumBackdrop(
@@ -46,11 +50,25 @@ fun AlbumBackdrop(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(Modifier.height(36.dp))
-            Box(
-                Modifier
+
+            GlideImage(
+                data = album.albumArtUrl,
+                modifier = Modifier
                     .offset { IntOffset(0, scrollPx) }
                     .size(192.dp)
-                    .background(Color.Black)
+                    .clip(RoundedCornerShape(4.dp)),
+                contentDescription = null,
+                fadeIn = true,
+                loading = {
+                    Box(
+                        Modifier
+                            .size(192.dp)
+                            .background(
+                                shape = RoundedCornerShape(4.dp),
+                                color = MaterialTheme.colors.onBackground.copy(alpha = 0.05f)
+                            )
+                    )
+                }
             )
 
             val titleAlpha = map(scrollFraction, from = 0.2f..0.5f, to = 1f..0f).coerceIn(0f, 1f)
@@ -61,10 +79,23 @@ fun AlbumBackdrop(
 
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically, modifier = alphaModifier) {
-                Box(
-                    Modifier
+                GlideImage(
+                    album.artistArtUrl,
+                    modifier = Modifier
                         .size(24.dp)
-                        .background(Color.Black, shape = CircleShape)
+                        .clip(CircleShape),
+                    contentDescription = null,
+                    fadeIn = true,
+                    loading = {
+                        Box(
+                            Modifier
+                                .size(24.dp)
+                                .background(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colors.onBackground.copy(alpha = 0.05f)
+                                )
+                        )
+                    }
                 )
                 Spacer(Modifier.width(8.dp))
                 CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
