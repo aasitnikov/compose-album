@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import com.example.musicappcompose.ui.AlbumScreen
-import com.example.musicappcompose.ui.Track
 import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
 
 class MainActivity : ComponentActivity() {

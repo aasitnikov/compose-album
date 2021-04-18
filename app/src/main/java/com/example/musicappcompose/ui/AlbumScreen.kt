@@ -16,9 +16,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,9 +38,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.musicappcompose.Album
 import com.example.musicappcompose.Overgrown
 import com.example.musicappcompose.R
@@ -44,12 +51,12 @@ import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
 
 @Composable
 fun AlbumScreen(album: Album) {
-    val state = rememberLazyListState()
+    val lazyListState = rememberLazyListState()
     Box(Modifier.fillMaxSize()) {
-        LazyColumn(Modifier.fillMaxSize(), state) {
+        LazyColumn(Modifier.fillMaxSize(), lazyListState) {
             item {
                 Box {
-                    val scrollFraction = state.firstItemOffsetFraction()
+                    val scrollFraction = lazyListState.firstItemOffsetFraction()
                     val scrimColor = MaterialTheme.colors.background.copy(alpha = scrollFraction)
                     Box(
                         Modifier.drawWithContent {
@@ -60,7 +67,7 @@ fun AlbumScreen(album: Album) {
                         AlbumBackdrop(
                             album,
                             Color(0xff2A5F79),
-                            state.firstItemOffsetPx(),
+                            lazyListState.firstItemOffsetPx(),
                             scrollFraction,
                             Modifier.fillMaxWidth(),
                         )
@@ -91,10 +98,52 @@ fun AlbumScreen(album: Album) {
             }
         }
 
-        AnchoredBox(state, Modifier.fillMaxWidth()) {
-            val fraction = state.firstItemOffsetFraction()
+        TopBar(lazyListState, album.title)
+
+        AnchoredBox(lazyListState, Modifier.fillMaxWidth()) {
+            val fraction = lazyListState.firstItemOffsetFraction()
             val itemsAlpha = map(fraction, from = 0.5f..0.8f, to = 1f..0f).coerceIn(0f, 1f)
             ThreeButtons(itemsAlpha)
+        }
+    }
+}
+
+@Composable
+private fun TopBar(state: LazyListState, albumTitle: String) {
+    val offset = state.firstItemOffsetFraction()
+    val alpha = map(offset, 0.78f..0.9f, 0f..0.96f).coerceIn(0f, 1f)
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .alpha(alpha)
+            .background(if (MaterialTheme.colors.isLight) Color.White else Color.Black)
+    ) {
+        Text(
+            text = albumTitle,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 16.dp),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+    Box(Modifier.fillMaxWidth()) {
+        IconButton(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(top = 4.dp, start = 4.dp),
+            onClick = { /*TODO*/ }
+        ) {
+            Icon(Icons.Filled.ArrowBack, contentDescription = null)
+        }
+        IconButton(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 4.dp, end = 4.dp),
+            onClick = { /*TODO*/ }
+        ) {
+            Icon(Icons.Filled.MoreVert, contentDescription = null)
         }
     }
 }

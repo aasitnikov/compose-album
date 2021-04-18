@@ -30,13 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicappcompose.R
+import com.example.musicappcompose.Track
 import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
-
-data class Track(
-    val title: String,
-    val position: Int,
-    val isPopular: Boolean,
-)
 
 @Composable
 fun TrackRow(
@@ -46,7 +41,8 @@ fun TrackRow(
     Row(
         modifier
             .height(52.dp)
-            .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(Modifier.width(20.dp), contentAlignment = Alignment.Center) {
             if (track.isPopular) {
