@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicappcompose.Album
 import com.example.musicappcompose.Overgrown
+import com.example.musicappcompose.map
 import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
 
 @Composable
@@ -52,8 +53,7 @@ fun AlbumBackdrop(
                     .background(Color.Black)
             )
 
-            // outputs 1..0 when scrollOffset in between 0.2..0.5
-            val titleAlpha = 1 - ((scrollFraction - 0.2f) * 10 / 3).coerceIn(0f, 1f)
+            val titleAlpha = map(scrollFraction, from = 0.2f..0.5f, to = 1f..0f).coerceIn(0f, 1f)
             val alphaModifier = Modifier.graphicsLayer(alpha = titleAlpha)
 
             Spacer(Modifier.height(16.dp))
