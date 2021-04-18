@@ -1,7 +1,10 @@
 package com.example.musicappcompose.ui
 
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,30 +22,51 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.palette.graphics.Palette
 import com.example.musicappcompose.Album
 import com.example.musicappcompose.Overgrown
 import com.example.musicappcompose.map
 import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
 import com.google.accompanist.glide.GlideImage
+import com.google.accompanist.imageloading.ImageLoadState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun AlbumBackdrop(
     album: Album,
-    backgroundColor: Color,
     scrollPx: Int,
     scrollFraction: Float,
     modifier: Modifier = Modifier,
+    backgroundColorOverride: Color = Color.Unspecified, // for preview
 ) {
+    var bitmap: Bitmap? by remember { mutableStateOf(null) }
+    val backgroundColor by if (backgroundColorOverride.isSpecified) {
+        remember { mutableStateOf(backgroundColorOverride) }
+    } else {
+        val color = backgroundColorFromBitmap(bitmap)
+        animateColorAsState(color.takeIf { it.isSpecified } ?: albumBackgroundColor)
+    }
+
     Surface(
         color = backgroundColor,
         contentColor = Color.White,
@@ -59,13 +83,18 @@ fun AlbumBackdrop(
                     .clip(RoundedCornerShape(4.dp)),
                 contentDescription = null,
                 fadeIn = true,
+                onRequestCompleted = { loadState ->
+                    if (loadState is ImageLoadState.Success) {
+                        bitmap = (loadState.painter as BitmapPainter).asAndroidBitmap()
+                    }
+                },
                 loading = {
                     Box(
                         Modifier
                             .size(192.dp)
                             .background(
                                 shape = RoundedCornerShape(4.dp),
-                                color = MaterialTheme.colors.onBackground.copy(alpha = 0.05f)
+                                color = Color.White.copy(alpha = if (isSystemInDarkTheme()) 0.05f else 0.1f)
                             )
                     )
                 }
@@ -92,7 +121,7 @@ fun AlbumBackdrop(
                                 .size(24.dp)
                                 .background(
                                     shape = CircleShape,
-                                    color = MaterialTheme.colors.onBackground.copy(alpha = 0.05f)
+                                    color = Color.White.copy(alpha = if (isSystemInDarkTheme()) 0.05f else 0.1f)
                                 )
                         )
                     }
@@ -106,6 +135,36 @@ fun AlbumBackdrop(
     }
 }
 
+private fun BitmapPainter.asAndroidBitmap(): Bitmap {
+    return this.javaClass.declaredFields
+        .first { it.name == "image" }
+        .apply { isAccessible = true }
+        .let { field -> field.get(this) as ImageBitmap }
+        .asAndroidBitmap()
+}
+
+@Composable
+private fun backgroundColorFromBitmap(bitmap: Bitmap?): Color {
+    if (bitmap == null) return Color.Unspecified
+
+    val palette: Palette? by produceState<Palette?>(initialValue = null, key1 = bitmap) {
+        value = withContext(Dispatchers.IO) { Palette.from(bitmap).generate() }
+    }
+
+    palette.apply {
+        if (this == null) return Color.Unspecified
+        val swatch = darkMutedSwatch ?: darkVibrantSwatch ?: mutedSwatch ?: vibrantSwatch
+        return if (swatch != null) {
+            Color(swatch.rgb)
+        } else {
+            Color.Unspecified
+        }
+    }
+}
+
+private val albumBackgroundColor: Color
+    @Composable get() = if (MaterialTheme.colors.isLight) Color(0xFF616161) else Color(0xff141414)
+
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview
 @Composable
@@ -113,7 +172,7 @@ private fun AlbumBackdropPreview() {
     MusicAppComposeTheme {
         AlbumBackdrop(
             album = Overgrown,
-            backgroundColor = Color(0xff2A5F79),
+            backgroundColorOverride = Color(0xff2A5F79),
             scrollPx = 0,
             scrollFraction = 0f,
             modifier = Modifier.width(360.dp),

@@ -89,7 +89,6 @@ fun AlbumScreen(
                     ) {
                         AlbumBackdrop(
                             album,
-                            Color(0xff2A5F79),
                             lazyListState.firstItemOffsetPx(),
                             scrollFraction,
                             Modifier.fillMaxWidth(),

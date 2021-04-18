@@ -41,6 +41,7 @@ android {
 dependencies {
 
     implementation("com.google.accompanist:accompanist-glide:0.7.1")
+    implementation("androidx.palette:palette-ktx:1.0.0")
 
     implementation("androidx.core:core-ktx:1.3.2")
     implementation("androidx.appcompat:appcompat:1.2.0")

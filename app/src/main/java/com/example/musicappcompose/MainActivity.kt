@@ -31,6 +31,10 @@ class MainActivity : ComponentActivity() {
             MusicAppComposeTheme {
                 CompositionLocalProvider(LocalRequestManager provides glide) {
                     var isLoading by rememberSaveable { mutableStateOf(true) }
+                    LaunchedEffect(Unit) {
+                        delay(1000)
+                        isLoading = false
+                    }
                     Surface(color = MaterialTheme.colors.background) {
                         AlbumScreen(
                             Overgrown.takeUnless { isLoading },
