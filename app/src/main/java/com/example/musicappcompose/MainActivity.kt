@@ -5,6 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import com.example.musicappcompose.ui.AlbumScreen
 import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
 
@@ -14,8 +18,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MusicAppComposeTheme {
+                var isLoading by rememberSaveable { mutableStateOf(true) }
                 Surface(color = MaterialTheme.colors.background) {
-                    AlbumScreen(Overgrown)
+                    AlbumScreen(
+                        Overgrown.takeUnless { isLoading },
+                        onBackClicked = { isLoading = true },
+                        onMoreClicked = { isLoading = false },
+                    )
                 }
             }
         }

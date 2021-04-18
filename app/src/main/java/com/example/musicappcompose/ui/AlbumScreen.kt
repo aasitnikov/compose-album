@@ -51,10 +51,32 @@ import com.example.musicappcompose.map
 import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
 
 @Composable
-fun AlbumScreen(album: Album) {
+fun AlbumScreen(
+    album: Album?, // null when loading
+    onBackClicked: () -> Unit,
+    onMoreClicked: () -> Unit,
+) {
     val lazyListState = rememberLazyListState()
     Box(Modifier.fillMaxSize()) {
         LazyColumn(Modifier.fillMaxSize(), lazyListState) {
+            if (album == null) {
+                item {
+                    Box {
+                        AlbumLoadingScreen(
+                            Modifier
+                                .align(Alignment.TopCenter)
+                                .fillMaxWidth()
+                                .background(color = albumBackgroundColor)
+                        )
+                        BottomSheetHat(
+                            Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter)
+                        )
+                    }
+                }
+                return@LazyColumn
+            }
             item {
                 Box {
                     val scrollFraction = lazyListState.firstItemOffsetFraction()
@@ -82,12 +104,7 @@ fun AlbumScreen(album: Album) {
             }
 
             item {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(24.dp)
-                        .background(MaterialTheme.colors.background)
-                )
+                Spacer(Modifier.height(24.dp))
             }
 
             items(album.tracks) { track ->
@@ -99,18 +116,25 @@ fun AlbumScreen(album: Album) {
             }
         }
 
-        TopBar(lazyListState, album.title)
+        TopBar(lazyListState, album?.title ?: "", onBackClicked, onMoreClicked)
 
-        AnchoredBox(lazyListState, Modifier.fillMaxWidth()) {
-            val fraction = lazyListState.firstItemOffsetFraction()
-            val itemsAlpha = map(fraction, from = 0.5f..0.8f, to = 1f..0f).coerceIn(0f, 1f)
-            ThreeButtons(itemsAlpha, Modifier.align(Alignment.TopCenter))
+        if (album != null) {
+            AnchoredBox(lazyListState, Modifier.fillMaxWidth()) {
+                val fraction = lazyListState.firstItemOffsetFraction()
+                val itemsAlpha = map(fraction, from = 0.5f..0.8f, to = 1f..0f).coerceIn(0f, 1f)
+                ThreeButtons(itemsAlpha, Modifier.align(Alignment.TopCenter))
+            }
         }
     }
 }
 
 @Composable
-private fun TopBar(state: LazyListState, albumTitle: String) {
+private fun TopBar(
+    state: LazyListState,
+    albumTitle: String,
+    onBackClicked: () -> Unit,
+    onMoreClicked: () -> Unit,
+) {
     val offset = state.firstItemOffsetFraction()
     val alpha = map(offset, 0.78f..0.9f, 0f..0.96f).coerceIn(0f, 1f)
     Box(
@@ -134,7 +158,7 @@ private fun TopBar(state: LazyListState, albumTitle: String) {
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(top = 4.dp, start = 4.dp),
-            onClick = { /*TODO*/ }
+            onClick = onBackClicked
         ) {
             Icon(Icons.Filled.ArrowBack, contentDescription = null)
         }
@@ -142,7 +166,7 @@ private fun TopBar(state: LazyListState, albumTitle: String) {
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(top = 4.dp, end = 4.dp),
-            onClick = { /*TODO*/ }
+            onClick = onMoreClicked
         ) {
             Icon(Icons.Filled.MoreVert, contentDescription = null)
         }
@@ -244,11 +268,16 @@ private fun AnchoredBox(
     Box(
         content = content,
         modifier = modifier
+            // TODO there's visible blink, because on initial composition height is 0
+            .alpha(if (height == 0) 0f else 1f) // hack
             .offset { IntOffset(0, offset) }
             .onSizeChanged { height = it.height }
             .padding(paddingValues)
     )
 }
+
+private val albumBackgroundColor: Color
+    @Composable get() = if (MaterialTheme.colors.isLight) Color(0xFFF6F5F3) else Color(0xff141414)
 
 @Preview(widthDp = 360, heightDp = 740, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(widthDp = 360, heightDp = 740)
@@ -256,7 +285,18 @@ private fun AnchoredBox(
 private fun AlbumScreenPreview() {
     MusicAppComposeTheme {
         Surface(color = MaterialTheme.colors.background) {
-            AlbumScreen(Overgrown)
+            AlbumScreen(Overgrown, { }, { })
+        }
+    }
+}
+
+@Preview(widthDp = 360, heightDp = 740, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(widthDp = 360, heightDp = 740)
+@Composable
+private fun AlbumScreenLoadingPreview() {
+    MusicAppComposeTheme {
+        Surface(color = MaterialTheme.colors.background) {
+            AlbumScreen(null, { }, { })
         }
     }
 }
