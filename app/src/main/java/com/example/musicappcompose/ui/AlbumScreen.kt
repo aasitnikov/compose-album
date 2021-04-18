@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.example.musicappcompose.Album
 import com.example.musicappcompose.R
+import com.example.musicappcompose.map
 import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
 
 @Composable
@@ -87,7 +89,9 @@ fun AlbumScreen(album: Album) {
         }
 
         AnchoredBox(state, Modifier.fillMaxWidth()) {
-            ThreeButtons()
+            val fraction = state.firstItemOffsetFraction()
+            val itemsAlpha = map(fraction, from = 0.5f..0.8f, to = 1f..0f).coerceIn(0f, 1f)
+            ThreeButtons(itemsAlpha)
         }
     }
 }
@@ -104,18 +108,20 @@ private fun LazyListState.firstItemOffsetPx(): Int {
 @Composable
 private fun LazyListState.firstItemOffsetFraction(): Float {
     return if (firstVisibleItemIndex == 0) {
-        val firstItemInfo = layoutInfo.visibleItemsInfo.firstOrNull() ?: return 0f
+        val firstItemInfo = layoutInfo.visibleItemsInfo.firstOrNull() ?: return 1f
         return -firstItemInfo.offset.toFloat() / firstItemInfo.size
     } else {
-        0f
+        1f
     }
 }
 
 @Composable
-private fun ThreeButtons() {
+private fun ThreeButtons(itemsAlpha: Float) {
     Row {
         RoundButtonWithText(
-            modifier = Modifier.weight(0.5f),
+            modifier = Modifier
+                .weight(0.5f)
+                .alpha(itemsAlpha),
             onClick = { /*TODO*/ },
             backgroundColor = Color.White.copy(alpha = 0.1f),
             rippleColor = Color.White,
@@ -129,10 +135,13 @@ private fun ThreeButtons() {
             rippleColor = Color(0xFFE64A19),
             icon = rememberVectorPainter(Icons.Filled.PlayArrow),
             iconTint = Color.Black,
+            textAlpha = itemsAlpha,
             text = "Слушать"
         )
         RoundButtonWithText(
-            modifier = Modifier.weight(0.5f),
+            modifier = Modifier
+                .weight(0.5f)
+                .alpha(itemsAlpha),
             onClick = { /*TODO*/ },
             backgroundColor = Color.White.copy(alpha = 0.1f),
             rippleColor = Color.White,
@@ -152,7 +161,7 @@ private fun ThreeButtonsPreview() {
                 .background(Color(0XFF2A5F79))
                 .padding(vertical = 32.dp)
         ) {
-            ThreeButtons()
+            ThreeButtons(1f)
         }
     }
 }

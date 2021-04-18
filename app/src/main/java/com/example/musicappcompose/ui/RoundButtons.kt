@@ -24,6 +24,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -68,6 +69,7 @@ fun RoundButtonWithText(
     iconTint: Color,
     text: String,
     modifier: Modifier = Modifier,
+    textAlpha: Float = 1f,
     rippleColor: Color = Color.Unspecified,
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -85,6 +87,7 @@ fun RoundButtonWithText(
         ) {
             Text(
                 text = text,
+                modifier = Modifier.alpha(textAlpha),
                 textAlign = TextAlign.Center,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal
