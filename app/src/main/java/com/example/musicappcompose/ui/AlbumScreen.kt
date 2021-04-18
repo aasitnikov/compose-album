@@ -262,15 +262,15 @@ private fun AnchoredBox(
     }
 
     var height by remember { mutableStateOf(0) }
-    // TODO smooth easing instead of rough coerce
-    val offset = (backdropBottomY - height).coerceAtLeast(0)
 
     Box(
         content = content,
         modifier = modifier
-            // TODO there's visible blink, because on initial composition height is 0
-            .alpha(if (height == 0) 0f else 1f) // hack
-            .offset { IntOffset(0, offset) }
+            .offset {
+                // TODO maybe smooth easing instead of rough coerce
+                val offset = (backdropBottomY - height).coerceAtLeast(0)
+                IntOffset(0, offset)
+            }
             .onSizeChanged { height = it.height }
             .padding(paddingValues)
     )
