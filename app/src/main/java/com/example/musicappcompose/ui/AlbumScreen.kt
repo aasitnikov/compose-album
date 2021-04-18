@@ -1,5 +1,6 @@
 package com.example.musicappcompose.ui
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
@@ -35,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.example.musicappcompose.Album
+import com.example.musicappcompose.Overgrown
 import com.example.musicappcompose.R
 import com.example.musicappcompose.map
 import com.example.musicappcompose.ui.theme.MusicAppComposeTheme
@@ -108,7 +111,7 @@ private fun LazyListState.firstItemOffsetPx(): Int {
 @Composable
 private fun LazyListState.firstItemOffsetFraction(): Float {
     return if (firstVisibleItemIndex == 0) {
-        val firstItemInfo = layoutInfo.visibleItemsInfo.firstOrNull() ?: return 1f
+        val firstItemInfo = layoutInfo.visibleItemsInfo.firstOrNull() ?: return 0f
         return -firstItemInfo.offset.toFloat() / firstItemInfo.size
     } else {
         1f
@@ -174,10 +177,14 @@ private fun AnchoredBox(
     content: @Composable BoxScope.() -> Unit
 ) {
     val backdrop = state.layoutInfo.visibleItemsInfo.firstOrNull()
-    val backdropBottomY = if (backdrop != null && backdrop.index == 0) {
-        backdrop.size + backdrop.offset
+    val backdropBottomY = if (backdrop == null) {
+        780 // for preview
     } else {
-        0
+        if (backdrop.index == 0) {
+            backdrop.size + backdrop.offset
+        } else {
+            0
+        }
     }
 
     var height by remember { mutableStateOf(0) }
@@ -191,4 +198,15 @@ private fun AnchoredBox(
             .onSizeChanged { height = it.height }
             .padding(paddingValues)
     )
+}
+
+@Preview(widthDp = 360, heightDp = 740, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(widthDp = 360, heightDp = 740)
+@Composable
+private fun AlbumScreenPreview() {
+    MusicAppComposeTheme {
+        Surface(color = MaterialTheme.colors.background) {
+            AlbumScreen(Overgrown)
+        }
+    }
 }
