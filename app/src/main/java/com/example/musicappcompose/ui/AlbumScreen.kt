@@ -1,6 +1,7 @@
 package com.example.musicappcompose.ui
 
 import android.content.res.Configuration
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -262,12 +263,23 @@ private fun AnchoredBox(
 
     var height by remember { mutableStateOf(0) }
 
+    // https://cubic-bezier.com/#0,0,.5,1
+    val easing = CubicBezierEasing(.5f, 0f, 1f, 1f)
+
     Box(
         content = content,
         modifier = modifier
             .offset {
-                // TODO maybe smooth easing instead of rough coerce
-                val offset = (backdropBottomY - height).coerceAtLeast(0)
+                val y = backdropBottomY - height
+                val threshold = 100
+                val offset = when {
+                    y > threshold -> y
+                    y < -threshold -> 0
+                    else -> {
+                        val normalized = map(y.toFloat(), from = -threshold.toFloat()..threshold.toFloat(), to = 0f..1f)
+                        (threshold * easing.transform(normalized)).toInt()
+                    }
+                }
                 IntOffset(0, offset)
             }
             .onSizeChanged { height = it.height }
