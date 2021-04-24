@@ -5,6 +5,6 @@ data class Album(
     val author: String,
     val year: String,
     val albumArtUrl: String,
-    val artistArtUrl: String,
+    val artistArtUrl: String?,
     val tracks: List<Track>,
 )

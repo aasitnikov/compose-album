@@ -6,12 +6,14 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -39,6 +41,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -72,70 +76,111 @@ fun AlbumBackdrop(
     Surface(
         color = backgroundColor,
         contentColor = Color.White,
-        modifier = modifier.height(450.dp),
+        modifier = modifier,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(Modifier.height(36.dp))
 
-            GlideImage(
-                data = album.albumArtUrl,
-                modifier = Modifier
-                    .offset { IntOffset(0, scrollPx) }
-                    .size(192.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                contentDescription = null,
-                fadeIn = true,
-                onRequestCompleted = { loadState ->
-                    if (loadState is ImageLoadState.Success) {
-                        bitmap = (loadState.painter as BitmapPainter).asAndroidBitmap()
-                    }
-                },
-                error = {
-                    ErrorImage(Modifier.size(192.dp))
-                },
-                loading = {
-                    Box(
-                        Modifier
-                            .size(192.dp)
-                            .background(
-                                shape = RoundedCornerShape(4.dp),
-                                color = Color.White.copy(alpha = if (isSystemInDarkTheme()) 0.05f else 0.1f)
-                            )
-                    )
-                }
-            )
-
-            val titleAlpha = map(scrollFraction, from = 0.2f..0.5f, to = 1f..0f).coerceIn(0f, 1f)
-            val alphaModifier = Modifier.graphicsLayer(alpha = titleAlpha)
-
-            Spacer(Modifier.height(16.dp))
-            Text(album.title, fontSize = 24.sp, fontWeight = FontWeight.Medium, modifier = alphaModifier)
-
-            Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = alphaModifier) {
+            if (!isInEditMode) {
                 GlideImage(
-                    album.artistArtUrl,
+                    data = album.albumArtUrl,
                     modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape),
+                        .offset { IntOffset(0, scrollPx) }
+                        .size(192.dp)
+                        .clip(RoundedCornerShape(4.dp)),
                     contentDescription = null,
                     fadeIn = true,
+                    onRequestCompleted = { loadState ->
+                        if (loadState is ImageLoadState.Success) {
+                            bitmap = (loadState.painter as BitmapPainter).asAndroidBitmap()
+                        }
+                    },
+                    error = {
+                        ErrorImage(Modifier.size(192.dp))
+                    },
                     loading = {
                         Box(
                             Modifier
-                                .size(24.dp)
+                                .size(192.dp)
                                 .background(
-                                    shape = CircleShape,
+                                    shape = RoundedCornerShape(4.dp),
                                     color = Color.White.copy(alpha = if (isSystemInDarkTheme()) 0.05f else 0.1f)
                                 )
                         )
                     }
                 )
-                Spacer(Modifier.width(8.dp))
+            } else {
+                Box(
+                    Modifier
+                        .background(Color.Black)
+                        .size(192.dp)
+                )
+            }
+
+            val titleAlpha = map(scrollFraction, from = 0.2f..0.5f, to = 1f..0f).coerceIn(0f, 1f)
+            val alphaModifier = Modifier.graphicsLayer(alpha = titleAlpha)
+
+            Spacer(Modifier.height(16.dp))
+            Text(
+                album.title,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                modifier = alphaModifier.padding(horizontal = 24.dp)
+            )
+
+            Spacer(Modifier.height(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = alphaModifier.padding(horizontal = 24.dp)
+            ) {
+                if (album.artistArtUrl != null) {
+                    if (!isInEditMode) {
+                        GlideImage(
+                            album.artistArtUrl,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape),
+                            contentDescription = null,
+                            fadeIn = true,
+                            loading = {
+                                Box(
+                                    Modifier
+                                        .size(24.dp)
+                                        .background(
+                                            shape = CircleShape,
+                                            color = Color.White.copy(alpha = if (isSystemInDarkTheme()) 0.05f else 0.1f)
+                                        )
+                                )
+                            }
+                        )
+                    } else {
+                        Box(
+                            Modifier
+                                .background(Color.Black, CircleShape)
+                                .size(24.dp)
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                }
                 CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                    Text("${album.author} · ${album.year}", fontSize = 14.sp)
+                    Text(
+                        album.author,
+                        fontSize = 14.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    Text(
+                        " · ${album.year}",
+                        fontSize = 14.sp,
+                    )
                 }
             }
+            Spacer(Modifier.height(140.dp)) // Space for buttons
         }
     }
 }
@@ -180,18 +225,13 @@ private fun ErrorImage(modifier: Modifier) {
     }
 }
 
-@Preview
-@Composable
-fun ErrorImagePreview() {
-    Box(Modifier.background(Color.DarkGray)) {
-        ErrorImage(modifier = Modifier.size(192.dp))
-    }
-}
+private var isInEditMode = false
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview
 @Composable
 private fun AlbumBackdropPreview() {
+    isInEditMode = true
     MusicAppComposeTheme {
         AlbumBackdrop(
             album = Overgrown,
@@ -200,5 +240,32 @@ private fun AlbumBackdropPreview() {
             scrollFraction = 0f,
             modifier = Modifier.width(360.dp),
         )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, group = "Long text")
+@Composable
+private fun AlbumBackdropLongTextsPreview() {
+    isInEditMode = true
+    MusicAppComposeTheme {
+        AlbumBackdrop(
+            album = Overgrown.copy(
+                title = "1017 Loaded feat. Gucci Mane, Big Scarr, Enchanting, Scarabey, Blister, Chukcha",
+                author = "Roboy, Gucci Mane, Foogiano, Enchanting, Scarabey, Blister, Chukcha",
+                artistArtUrl = null,
+            ),
+            backgroundColorOverride = Color(0xff2A5F79),
+            scrollPx = 0,
+            scrollFraction = 0f,
+            modifier = Modifier.width(360.dp),
+        )
+    }
+}
+
+@Preview
+@Composable
+fun ErrorImagePreview() {
+    Box(Modifier.background(Color.DarkGray)) {
+        ErrorImage(modifier = Modifier.size(192.dp))
     }
 }
