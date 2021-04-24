@@ -3,6 +3,7 @@ package com.example.musicappcompose.ui
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.painter.BitmapPainter
@@ -87,6 +89,9 @@ fun AlbumBackdrop(
                     if (loadState is ImageLoadState.Success) {
                         bitmap = (loadState.painter as BitmapPainter).asAndroidBitmap()
                     }
+                },
+                error = {
+                    ErrorImage(Modifier.size(192.dp))
                 },
                 loading = {
                     Box(
@@ -164,6 +169,24 @@ private fun backgroundColorFromBitmap(bitmap: Bitmap?): Color {
 
 private val albumBackgroundColor: Color
     @Composable get() = if (MaterialTheme.colors.isLight) Color(0xFF616161) else Color(0xff141414)
+
+@Composable
+private fun ErrorImage(modifier: Modifier) {
+    val color = Color.White.copy(alpha = 0.1f)
+    Canvas(modifier = modifier) {
+        drawRect(color)
+        drawCircle(color, 3.dp.toPx(), style = Stroke(width = 3.dp.toPx()))
+        drawCircle(color, 24.dp.toPx(), style = Stroke(width = 3.dp.toPx()))
+    }
+}
+
+@Preview
+@Composable
+fun ErrorImagePreview() {
+    Box(Modifier.background(Color.DarkGray)) {
+        ErrorImage(modifier = Modifier.size(192.dp))
+    }
+}
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview
