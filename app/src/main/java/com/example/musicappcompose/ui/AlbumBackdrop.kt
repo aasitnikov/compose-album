@@ -3,7 +3,6 @@ package com.example.musicappcompose.ui
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -112,7 +112,8 @@ fun AlbumBackdrop(
             } else {
                 Box(
                     Modifier
-                        .background(Color.Black)
+                        .offset { IntOffset(0, scrollPx) }
+                        .background(Color.Black, RoundedCornerShape(4.dp))
                         .size(192.dp)
                 )
             }
@@ -201,7 +202,7 @@ private fun backgroundColorFromBitmap(bitmap: Bitmap?): Color {
         value = withContext(Dispatchers.IO) { Palette.from(bitmap).generate() }
     }
 
-    palette.apply {
+    with(palette) {
         if (this == null) return Color.Unspecified
         val swatch = darkMutedSwatch ?: darkVibrantSwatch ?: mutedSwatch ?: vibrantSwatch
         return if (swatch != null) {
@@ -212,20 +213,23 @@ private fun backgroundColorFromBitmap(bitmap: Bitmap?): Color {
     }
 }
 
-private val albumBackgroundColor: Color
+val albumBackgroundColor: Color
     @Composable get() = if (MaterialTheme.colors.isLight) Color(0xFF616161) else Color(0xff141414)
 
 @Composable
 private fun ErrorImage(modifier: Modifier) {
-    val color = Color.White.copy(alpha = 0.1f)
-    Canvas(modifier = modifier) {
-        drawRect(color)
-        drawCircle(color, 3.dp.toPx(), style = Stroke(width = 3.dp.toPx()))
-        drawCircle(color, 24.dp.toPx(), style = Stroke(width = 3.dp.toPx()))
-    }
+    Box(modifier.drawWithCache {
+        val color = Color.White.copy(alpha = 0.1f)
+        val style = Stroke(width = 3.dp.toPx())
+        onDrawBehind {
+            drawRect(color)
+            drawCircle(color, 3.dp.toPx(), style = style)
+            drawCircle(color, 24.dp.toPx(), style = style)
+        }
+    })
 }
 
-private var isInEditMode = false
+var isInEditMode = false
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview

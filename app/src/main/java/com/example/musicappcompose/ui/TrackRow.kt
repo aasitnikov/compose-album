@@ -2,6 +2,7 @@ package com.example.musicappcompose.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -85,14 +86,14 @@ fun TrackRow(
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, widthDp = 360)
+@Preview(widthDp = 360)
 @Composable
 private fun TrackPreview() {
     MusicAppComposeTheme {
         Surface(color = MaterialTheme.colors.background) {
-            val track = Track("Boooubaou", 3, true)
-            TrackRow(track, Modifier.width(320.dp))
+            val track = Track("Bohemian rhapsody", 4, true)
+            TrackRow(track)
         }
     }
 }

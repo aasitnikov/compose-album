@@ -3,6 +3,7 @@ package com.example.musicappcompose.ui
 import android.content.res.Configuration
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -60,16 +61,40 @@ fun AlbumScreen(
 ) {
     val lazyListState = rememberLazyListState()
     Box(Modifier.fillMaxSize()) {
-        LazyColumn(Modifier.fillMaxSize(), lazyListState) {
-            if (album == null) {
+        if (album == null) {
+            Box(Modifier.border(1.dp, Color.Green)) {
+                AlbumLoadingScreen(
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .background(color = albumBackgroundColor)
+                )
+                BottomSheetHat(
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                )
+            }
+        } else {
+            LazyColumn(Modifier.fillMaxSize(), lazyListState) {
                 item {
-                    Box {
-                        AlbumLoadingScreen(
-                            Modifier
-                                .align(Alignment.TopCenter)
-                                .fillMaxWidth()
-                                .background(color = albumBackgroundColor)
-                        )
+                    Box(Modifier.border(1.dp, Color.Green)) {
+                        val scrollFraction = lazyListState.firstItemOffsetFraction()
+                        val scrimColor = MaterialTheme.colors.background.copy(alpha = scrollFraction)
+                        Box(
+                            Modifier.drawWithContent {
+                                drawContent()
+                                drawRect(scrimColor)
+                            }
+                        ) {
+                            AlbumBackdrop(
+                                album,
+                                lazyListState.firstItemOffsetPx(),
+                                scrollFraction,
+                                Modifier.fillMaxWidth(),
+                                Color(0xff2A5F79)
+                            )
+                        }
                         BottomSheetHat(
                             Modifier
                                 .fillMaxWidth()
@@ -77,43 +102,18 @@ fun AlbumScreen(
                         )
                     }
                 }
-                return@LazyColumn
-            }
-            item {
-                Box {
-                    val scrollFraction = lazyListState.firstItemOffsetFraction()
-                    val scrimColor = MaterialTheme.colors.background.copy(alpha = scrollFraction)
-                    Box(
-                        Modifier.drawWithContent {
-                            drawContent()
-                            drawRect(scrimColor)
-                        }
-                    ) {
-                        AlbumBackdrop(
-                            album,
-                            lazyListState.firstItemOffsetPx(),
-                            scrollFraction,
-                            Modifier.fillMaxWidth(),
-                        )
-                    }
-                    BottomSheetHat(
-                        Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.BottomCenter)
-                    )
+
+                item {
+                    Spacer(Modifier.height(24.dp))
                 }
-            }
 
-            item {
-                Spacer(Modifier.height(24.dp))
-            }
+                items(album.tracks) { track ->
+                    TrackRow(track)
+                }
 
-            items(album.tracks) { track ->
-                TrackRow(track)
-            }
-
-            item {
-                Spacer(Modifier.height(500.dp))
+                item {
+                    Spacer(Modifier.height(500.dp))
+                }
             }
         }
 
@@ -177,7 +177,7 @@ private fun TopBar(
 }
 
 @Composable
-private fun LazyListState.firstItemOffsetPx(): Int {
+fun LazyListState.firstItemOffsetPx(): Int {
     return if (firstVisibleItemIndex == 0) {
         firstVisibleItemScrollOffset
     } else {
@@ -186,7 +186,7 @@ private fun LazyListState.firstItemOffsetPx(): Int {
 }
 
 @Composable
-private fun LazyListState.firstItemOffsetFraction(): Float {
+fun LazyListState.firstItemOffsetFraction(): Float {
     return if (firstVisibleItemIndex == 0) {
         val firstItemInfo = layoutInfo.visibleItemsInfo.firstOrNull() ?: return 0f
         return -firstItemInfo.offset.toFloat() / firstItemInfo.size
@@ -196,7 +196,7 @@ private fun LazyListState.firstItemOffsetFraction(): Float {
 }
 
 @Composable
-private fun ThreeButtons(itemsAlpha: Float, modifier: Modifier = Modifier) {
+fun ThreeButtons(itemsAlpha: Float, modifier: Modifier = Modifier) {
     Row(modifier = modifier) {
         RoundButtonWithText(
             modifier = Modifier
@@ -247,22 +247,12 @@ private fun ThreeButtonsPreview() {
 }
 
 @Composable
-private fun AnchoredBox(
+fun AnchoredBox(
     state: LazyListState,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(top = 46.dp, bottom = 36.dp),
     content: @Composable BoxScope.() -> Unit
 ) {
-    val backdrop = state.layoutInfo.visibleItemsInfo.firstOrNull()
-    val backdropBottomY = if (backdrop == null) {
-        780 // for preview
-    } else {
-        if (backdrop.index == 0) {
-            backdrop.size + backdrop.offset
-        } else {
-            0
-        }
-    }
 
     var height by remember { mutableStateOf(0) }
 
@@ -272,7 +262,10 @@ private fun AnchoredBox(
     Box(
         content = content,
         modifier = modifier
+            .onSizeChanged { height = it.height }
+            .padding(paddingValues)
             .offset {
+                val backdropBottomY = state.firstItemBottomY()
                 val y = backdropBottomY - height
                 val threshold = 100
                 val offset = when {
@@ -285,18 +278,59 @@ private fun AnchoredBox(
                 }
                 IntOffset(0, offset)
             }
+            .border(1.dp, Color.Red)
+    )
+}
+
+private fun LazyListState.firstItemBottomY(): Int {
+    val backdrop = layoutInfo.visibleItemsInfo.firstOrNull()
+    return if (backdrop == null) {
+        780 // for preview
+    } else {
+        if (backdrop.index == 0) {
+            backdrop.size + backdrop.offset
+        } else {
+            0
+        }
+    }
+}
+
+@Composable
+private fun AnchoredBox2(
+    state: LazyListState,
+    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(top = 46.dp, bottom = 36.dp),
+    content: @Composable BoxScope.() -> Unit
+) {
+    val firstItem = state.layoutInfo.visibleItemsInfo.firstOrNull()
+    val backdropBottomY = if (firstItem == null || firstItem.index != 0) {
+        0
+    } else {
+        firstItem.size + firstItem.offset
+    }
+
+    var height by remember { mutableStateOf(0) }
+
+    Box(
+        content = content,
+        modifier = modifier
+            .offset {
+                val offset = (backdropBottomY - height).coerceAtLeast(0)
+                IntOffset(0, offset)
+            }
             .onSizeChanged { height = it.height }
             .padding(paddingValues)
     )
 }
 
-private val albumBackgroundColor: Color
+private val albumBackgroundColor2: Color
     @Composable get() = if (MaterialTheme.colors.isLight) Color(0xFFF6F5F3) else Color(0xff141414)
 
 @Preview(widthDp = 360, heightDp = 740, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(widthDp = 360, heightDp = 740)
 @Composable
 private fun AlbumScreenPreview() {
+    isInEditMode = true
     MusicAppComposeTheme {
         Surface(color = MaterialTheme.colors.background) {
             AlbumScreen(Overgrown, { }, { })

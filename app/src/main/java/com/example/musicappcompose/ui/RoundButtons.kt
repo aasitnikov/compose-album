@@ -90,7 +90,8 @@ fun RoundButtonWithText(
                 modifier = Modifier.alpha(textAlpha),
                 textAlign = TextAlign.Center,
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Normal
+                fontWeight = FontWeight.Normal,
+                color = Color.White.copy(alpha = ContentAlpha.medium)
             )
         }
     }

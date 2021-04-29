@@ -32,8 +32,8 @@ fun AlbumLoadingScreen(modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition()
 
     val opacity by infiniteTransition.animateFloat(
-        initialValue = 0.05f,
-        targetValue = 0.1f,
+        initialValue = 0.2f,
+        targetValue = 0.4f,
         animationSpec = infiniteRepeatable(
             animation = tween(800),
             repeatMode = RepeatMode.Reverse
